@@ -163,11 +163,66 @@
             if (screenId === 'tela-relatorio') renderReport();
         }
 
+function obterBanco() {
+    let db = localStorage.getItem('task_db');
+    if (!db) {
+        // Banco inicial caso não exista
+        const inicial = { 
+            usuarios: [{ email: 'admin@uepa.br', senha: '123' }],
+            logs: [] 
+        };
+        localStorage.setItem('task_db', JSON.stringify(inicial));
+        return inicial;
+    }
+    return JSON.parse(db);
+}
+
+function registrarLog(mensagem, tipo = 'INFO') {
+    let db = obterBanco();
+    const novoLog = {
+        data: new Date().toLocaleString(),
+        tipo: tipo,
+        mensagem: mensagem
+    };
+    db.logs.push(novoLog);
+    localStorage.setItem('task_db', JSON.stringify(db));
+    console.log(`[${tipo}] ${mensagem}`);
+}
+
+function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const senha = document.getElementById('senha').value;
+    let db = obterBanco();
+
+    const usuario = db.usuarios.find(u => u.email === email && u.senha === senha);
+
+    if (usuario) {
+        registrarLog(`Login bem-sucedido: ${email}`, 'SUCESSO');
+        navigate('tela-painel');
+    } else {
+        registrarLog(`Tentativa de login falha: ${email}`, 'ALERTA');
+        alert('Credenciais Inválidas! Verifique o Log de Auditoria.');
+    }
+}
+
         // Simulação de Login
-        function handleLogin(e) {
-            e.preventDefault();
-            navigate('tela-painel');
-        }
+       function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const senha = document.getElementById('senha').value;
+    let db = obterBanco();
+
+    const usuario = db.usuarios.find(u => u.email === email && u.senha === senha);
+
+    if (usuario) {
+        registrarLog(`Login bem-sucedido: ${email}`, 'SUCESSO');
+        navigate('tela-painel');
+    } else {
+        registrarLog(`Tentativa de login falha: ${email}`, 'ALERTA');
+        alert('Credenciais Inválidas! Verifique o Log de Auditoria.');
+    }
+}
 
         // Validação e Submissão de Tarefa
         function handleTaskSubmit(e) {
